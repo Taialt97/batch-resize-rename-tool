@@ -4,6 +4,8 @@ A native macOS desktop application for batch resizing and renaming image files. 
 
 Import images, organize them into batches, apply global or per-file settings, and export everything in one operation.
 
+<img width="1072" height="832" alt="Screenshot 2026-03-02 at 14 08 39" src="https://github.com/user-attachments/assets/88e626ed-b6f7-4343-9a81-944fe6cd2a6b" />
+
 ## Features
 
 - **Drag-and-drop import** — drop image files directly into the window or use the file picker. Supports PNG, JPEG, TIFF, BMP, GIF, HEIC, and WebP.

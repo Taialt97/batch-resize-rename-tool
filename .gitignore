@@ -1,0 +1,44 @@
+# --- Xcode ---
+build/
+DerivedData/
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode user-specific data
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+
+# Xcode playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Xcode workspace settings (user-specific)
+*.xcworkspace/xcuserdata/
+
+# --- Swift Package Manager ---
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# --- Archives & distribution ---
+*.app.dSYM/
+export/
+
+# --- Misc ---
+*.log
+*.hmap
+*.ipa
+*.mobileprovision
+*.moved-aside

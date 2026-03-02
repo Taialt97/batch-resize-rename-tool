@@ -1,5 +1,7 @@
 # Batch Resize & Rename Tool
 
+**This application was created entirely using AI.**
+
 A native macOS desktop application for batch resizing and renaming image files. Built with SwiftUI and CoreGraphics.
 
 Import images, organize them into batches, apply global or per-file settings, and export everything in one operation.
@@ -85,10 +87,6 @@ Batch Resize & Rename Tool/
 
 ## License
 
-This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
+This project is open source and licensed under the [MIT License](LICENSE).
 
-You are free to view, download, and use the source code for any **non-commercial purpose** — personal projects, learning, research, education, etc.
-
-**Commercial use is strictly prohibited.** You may not sell this application, include it in a commercial product, or use the source code to build software for commercial purposes.
-
-See [LICENSE](LICENSE) for the full legal text.
+You are free to use, modify, and distribute this software for any purpose, including commercial use.

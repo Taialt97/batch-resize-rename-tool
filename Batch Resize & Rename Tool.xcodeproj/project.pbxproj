@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4B00000000000000000001 /* SizeAndNameShifterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00000000000000000001 /* SizeAndNameShifterApp.swift */; };
+		4B00000000000000000001 /* BatchResizeRenameToolApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00000000000000000001 /* BatchResizeRenameToolApp.swift */; };
 		4B00000000000000000002 /* ImageFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00000000000000000002 /* ImageFile.swift */; };
 		4B00000000000000000003 /* BatchProcessorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00000000000000000003 /* BatchProcessorViewModel.swift */; };
 		4B00000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A00000000000000000004 /* ContentView.swift */; };
@@ -19,7 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		4A00000000000000000001 /* SizeAndNameShifterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeAndNameShifterApp.swift; sourceTree = "<group>"; };
+		4A00000000000000000001 /* BatchResizeRenameToolApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchResizeRenameToolApp.swift; sourceTree = "<group>"; };
 		4A00000000000000000002 /* ImageFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFile.swift; sourceTree = "<group>"; };
 		4A00000000000000000003 /* BatchProcessorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchProcessorViewModel.swift; sourceTree = "<group>"; };
 		4A00000000000000000004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -27,7 +27,7 @@
 		4A00000000000000000006 /* FileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListView.swift; sourceTree = "<group>"; };
 		4A00000000000000000007 /* BatchFileRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchFileRowView.swift; sourceTree = "<group>"; };
 		4A00000000000000000008 /* ImageProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessingService.swift; sourceTree = "<group>"; };
-		4A00000000000000000009 /* SizeAndNameShifter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SizeAndNameShifter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A00000000000000000009 /* Batch Resize & Rename Tool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Batch Resize & Rename Tool.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A0000000000000000000A /* Batch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Batch.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -45,21 +45,21 @@
 		4C00000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				4C00000000000000000002 /* SizeAndNameShifter */,
+				4C00000000000000000002 /* Batch Resize & Rename Tool */,
 				4C00000000000000000007 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		4C00000000000000000002 /* SizeAndNameShifter */ = {
+		4C00000000000000000002 /* Batch Resize & Rename Tool */ = {
 			isa = PBXGroup;
 			children = (
-				4A00000000000000000001 /* SizeAndNameShifterApp.swift */,
+				4A00000000000000000001 /* BatchResizeRenameToolApp.swift */,
 				4C00000000000000000003 /* Models */,
 				4C00000000000000000004 /* ViewModels */,
 				4C00000000000000000005 /* Views */,
 				4C00000000000000000006 /* Services */,
 			);
-			path = SizeAndNameShifter;
+			path = "Batch Resize & Rename Tool";
 			sourceTree = "<group>";
 		};
 		4C00000000000000000003 /* Models */ = {
@@ -101,7 +101,7 @@
 		4C00000000000000000007 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A00000000000000000009 /* SizeAndNameShifter.app */,
+				4A00000000000000000009 /* Batch Resize & Rename Tool.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -109,9 +109,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4E00000000000000000001 /* SizeAndNameShifter */ = {
+		4E00000000000000000001 /* Batch Resize & Rename Tool */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5100000000000000000002 /* Build configuration list for PBXNativeTarget "SizeAndNameShifter" */;
+			buildConfigurationList = 5100000000000000000002 /* Build configuration list for PBXNativeTarget "Batch Resize & Rename Tool" */;
 			buildPhases = (
 				4D00000000000000000001 /* Sources */,
 				4D00000000000000000002 /* Frameworks */,
@@ -120,9 +120,9 @@
 			);
 			dependencies = (
 			);
-			name = SizeAndNameShifter;
-			productName = SizeAndNameShifter;
-			productReference = 4A00000000000000000009 /* SizeAndNameShifter.app */;
+			name = "Batch Resize & Rename Tool";
+			productName = "Batch Resize & Rename Tool";
+			productReference = 4A00000000000000000009 /* Batch Resize & Rename Tool.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -135,7 +135,7 @@
 				LastSwiftUpdateCheck = 1540;
 				LastUpgradeCheck = 1540;
 			};
-			buildConfigurationList = 5100000000000000000001 /* Build configuration list for PBXProject "SizeAndNameShifter" */;
+			buildConfigurationList = 5100000000000000000001 /* Build configuration list for PBXProject "Batch Resize & Rename Tool" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -148,7 +148,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4E00000000000000000001 /* SizeAndNameShifter */,
+				4E00000000000000000001 /* Batch Resize & Rename Tool */,
 			);
 		};
 /* End PBXProject section */
@@ -158,7 +158,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B00000000000000000001 /* SizeAndNameShifterApp.swift in Sources */,
+				4B00000000000000000001 /* BatchResizeRenameToolApp.swift in Sources */,
 				4B00000000000000000002 /* ImageFile.swift in Sources */,
 				4B0000000000000000000A /* Batch.swift in Sources */,
 				4B00000000000000000003 /* BatchProcessorViewModel.swift in Sources */,
@@ -308,7 +308,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sizeandnameshifter.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.taialt.batch-resize-rename-tool;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -334,7 +334,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sizeandnameshifter.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.taialt.batch-resize-rename-tool;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -344,7 +344,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		5100000000000000000001 /* Build configuration list for PBXProject "SizeAndNameShifter" */ = {
+		5100000000000000000001 /* Build configuration list for PBXProject "Batch Resize & Rename Tool" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5000000000000000000001 /* Debug */,
@@ -353,7 +353,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5100000000000000000002 /* Build configuration list for PBXNativeTarget "SizeAndNameShifter" */ = {
+		5100000000000000000002 /* Build configuration list for PBXNativeTarget "Batch Resize & Rename Tool" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5000000000000000000003 /* Debug */,

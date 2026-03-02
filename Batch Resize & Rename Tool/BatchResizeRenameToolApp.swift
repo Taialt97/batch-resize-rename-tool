@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SizeAndNameShifterApp: App {
+struct BatchResizeRenameToolApp: App {
     var body: some Scene {
         WindowGroup("Batch Resize & Rename Tool") {
             ContentView()

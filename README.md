@@ -20,7 +20,7 @@ Import images, organize them into batches, apply global or per-file settings, an
 
 Pre-built `.app` binaries are available on the [Releases](../../releases) page.
 
-Download the latest `.zip`, extract it, and move `SizeAndNameShifter.app` to your Applications folder.
+Download the latest `.zip`, extract it, and move `Batch Resize & Rename Tool.app` to your Applications folder.
 
 > **Note:** The app is not notarized. On first launch, right-click the app and select "Open" to bypass Gatekeeper, or go to System Settings > Privacy & Security and click "Open Anyway".
 
@@ -44,7 +44,7 @@ Download the latest `.zip`, extract it, and move `SizeAndNameShifter.app` to you
    open "Batch Resize & Rename Tool.xcodeproj"
    ```
 
-3. Select the **SizeAndNameShifter** scheme and press **Cmd+R** to build and run.
+3. Select the **Batch Resize & Rename Tool** scheme and press **Cmd+R** to build and run.
 
 ## Usage
 
@@ -65,20 +65,20 @@ The number of zeros inside the brackets sets the minimum digit width.
 ## Project Structure
 
 ```
-SizeAndNameShifter/
-├── SizeAndNameShifterApp.swift       # App entry point
+Batch Resize & Rename Tool/
+├── BatchResizeRenameToolApp.swift     # App entry point
 ├── Models/
-│   ├── Batch.swift                   # Batch data model
-│   └── ImageFile.swift               # Image file data model + thumbnail generation
+│   ├── Batch.swift                    # Batch data model
+│   └── ImageFile.swift                # Image file data model + thumbnail generation
 ├── ViewModels/
-│   └── BatchProcessorViewModel.swift # Central state management and processing logic
+│   └── BatchProcessorViewModel.swift  # Central state management and processing logic
 ├── Views/
-│   ├── ContentView.swift             # Main window layout
-│   ├── GlobalSettingsPanel.swift     # Global settings UI
-│   ├── FileListView.swift            # File list with batches and ungrouped files
-│   └── BatchFileRowView.swift        # Individual file row with override fields
+│   ├── ContentView.swift              # Main window layout
+│   ├── GlobalSettingsPanel.swift      # Global settings UI
+│   ├── FileListView.swift             # File list with batches and ungrouped files
+│   └── BatchFileRowView.swift         # Individual file row with override fields
 └── Services/
-    └── ImageProcessingService.swift  # CoreGraphics resize and PNG export
+    └── ImageProcessingService.swift   # CoreGraphics resize and PNG export
 ```
 
 ## License

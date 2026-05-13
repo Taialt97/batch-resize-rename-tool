@@ -33,9 +33,34 @@ struct GlobalSettingsPanel: View {
             HStack(spacing: 6) {
                 labeledField("W:", text: $viewModel.globalWidth, width: 70)
                 labeledField("H:", text: $viewModel.globalHeight, width: 70)
+                Picker("", selection: $viewModel.dimensionUnit) {
+                    ForEach(DimensionUnit.allCases, id: \.self) { unit in
+                        Text(unit.rawValue).tag(unit)
+                    }
+                }
+                .labelsHidden()
+                .frame(width: 90)
+                Divider().frame(height: 20)
                 labeledField("Pad:", text: $viewModel.globalPadding, width: 50)
                 Text("px")
                     .foregroundStyle(.tertiary)
+            }
+
+            if viewModel.dimensionUnit.needsResolution {
+                HStack(spacing: 6) {
+                    Text("Resolution:")
+                        .foregroundStyle(.secondary)
+                    TextField("", text: $viewModel.resolution)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 60)
+                    Picker("", selection: $viewModel.resolutionUnit) {
+                        ForEach(ResolutionUnit.allCases, id: \.self) { unit in
+                            Text(unit.rawValue).tag(unit)
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 110)
+                }
             }
         }
     }
@@ -55,9 +80,9 @@ struct GlobalSettingsPanel: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 180)
 
-                Toggle("Number across all batches", isOn: $viewModel.continuousNumbering)
+                Toggle("Recursive", isOn: $viewModel.continuousNumbering)
                     .toggleStyle(.checkbox)
-                    .help("ON = one running sequence across all batches. OFF = each batch starts at 1.")
+                    .help("One running sequence across all batches")
 
                 Toggle("Start at 0", isOn: $viewModel.sequenceStartsAtZero)
                     .toggleStyle(.checkbox)

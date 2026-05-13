@@ -4,6 +4,8 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @StateObject private var viewModel = BatchProcessorViewModel()
     @State private var isDropTargeted = false
+    @State private var pendingFolderImages: [URL] = []
+    @State private var showFolderImportDialog = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -45,6 +47,25 @@ struct ContentView: View {
         }
         .sheet(isPresented: $viewModel.showNoCropConfirmation) {
             NoCropConfirmationSheet(viewModel: viewModel)
+        }
+        .confirmationDialog(
+            "Import Folder Contents",
+            isPresented: $showFolderImportDialog,
+            titleVisibility: .visible
+        ) {
+            Button("Create a New Batch") {
+                viewModel.addFilesAsBatch(urls: pendingFolderImages)
+                pendingFolderImages = []
+            }
+            Button("Import as Individual Images") {
+                viewModel.addFiles(urls: pendingFolderImages)
+                pendingFolderImages = []
+            }
+            Button("Cancel", role: .cancel) {
+                pendingFolderImages = []
+            }
+        } message: {
+            Text("Found \(pendingFolderImages.count) image(s) in this folder. How would you like to add them?")
         }
     }
 
@@ -166,9 +187,32 @@ struct ContentView: View {
                 guard let data = data as? Data,
                       let url = URL(dataRepresentation: data, relativeTo: nil, isAbsolute: true)
                 else { return }
-                DispatchQueue.main.async { viewModel.addFiles(urls: [url]) }
+
+                var isDir: ObjCBool = false
+                FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+
+                DispatchQueue.main.async {
+                    if isDir.boolValue {
+                        let images = imagesInFolder(url)
+                        guard !images.isEmpty else { return }
+                        pendingFolderImages = images
+                        showFolderImportDialog = true
+                    } else {
+                        viewModel.addFiles(urls: [url])
+                    }
+                }
             }
         }
+    }
+
+    private func imagesInFolder(_ folderURL: URL) -> [URL] {
+        let imageExts: Set<String> = ["png", "jpg", "jpeg", "tiff", "tif", "bmp", "gif", "heic", "webp"]
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: folderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles
+        )) ?? []
+        return contents
+            .filter { imageExts.contains($0.pathExtension.lowercased()) }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 }
 

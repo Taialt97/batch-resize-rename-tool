@@ -1,6 +1,27 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+enum DimensionUnit: String, CaseIterable {
+    case pixels = "pixels"
+    case percent = "percent"
+    case inches = "inches"
+    case cm = "cm"
+    case mm = "mm"
+    case points = "points"
+
+    var needsResolution: Bool {
+        switch self {
+        case .inches, .cm, .mm, .points: return true
+        case .pixels, .percent: return false
+        }
+    }
+}
+
+enum ResolutionUnit: String, CaseIterable {
+    case pixelsPerInch = "pixels/inch"
+    case pixelsPerCm = "pixels/cm"
+}
+
 @MainActor
 final class BatchProcessorViewModel: ObservableObject {
 
@@ -12,6 +33,9 @@ final class BatchProcessorViewModel: ObservableObject {
     @Published var globalNamePattern = ""
     @Published var continuousNumbering = false
     @Published var sequenceStartsAtZero = false
+    @Published var dimensionUnit: DimensionUnit = .pixels
+    @Published var resolution: String = "72"
+    @Published var resolutionUnit: ResolutionUnit = .pixelsPerInch
 
     // MARK: - Data
 
@@ -140,23 +164,49 @@ final class BatchProcessorViewModel: ObservableObject {
         return Self.applyPattern(pattern, sequenceNumber: seqNum)
     }
 
+    // MARK: - Unit Conversion
+
+    private func effectiveDPI() -> Double {
+        let res = Double(resolution) ?? 72.0
+        return resolutionUnit == .pixelsPerInch ? res : res * 2.54
+    }
+
+    func toPixels(_ valueStr: String, originalPixels: Int) -> Int? {
+        guard let value = Double(valueStr), value > 0 else { return nil }
+        switch dimensionUnit {
+        case .pixels:
+            return Int(value)
+        case .percent:
+            return originalPixels > 0 ? max(1, Int((Double(originalPixels) * value / 100.0).rounded())) : nil
+        case .inches:
+            return max(1, Int((value * effectiveDPI()).rounded()))
+        case .cm:
+            return max(1, Int((value * effectiveDPI() / 2.54).rounded()))
+        case .mm:
+            return max(1, Int((value * effectiveDPI() / 25.4).rounded()))
+        case .points:
+            return max(1, Int((value * effectiveDPI() / 72.0).rounded()))
+        }
+    }
+
     // MARK: - Effective Dimensions (3‑Tier Resolution)
 
     func effectiveWidth(for fileID: UUID, in batch: Batch) -> Int? {
-        // Tier 3: file override
-        if let file = fileAt(id: fileID),
-           file.hasWidthOverride, let w = Int(file.overrideWidth), w > 0 { return w }
-        // Tier 2: batch override
-        if batch.hasWidthOverride, let w = Int(batch.overrideWidth), w > 0 { return w }
-        // Tier 1: global
-        return globalWidthInt
+        let origW = fileAt(id: fileID)?.pixelWidth ?? 0
+        if let file = fileAt(id: fileID), file.hasWidthOverride {
+            return toPixels(file.overrideWidth, originalPixels: origW)
+        }
+        if batch.hasWidthOverride { return toPixels(batch.overrideWidth, originalPixels: origW) }
+        return toPixels(globalWidth, originalPixels: origW)
     }
 
     func effectiveHeight(for fileID: UUID, in batch: Batch) -> Int? {
-        if let file = fileAt(id: fileID),
-           file.hasHeightOverride, let h = Int(file.overrideHeight), h > 0 { return h }
-        if batch.hasHeightOverride, let h = Int(batch.overrideHeight), h > 0 { return h }
-        return globalHeightInt
+        let origH = fileAt(id: fileID)?.pixelHeight ?? 0
+        if let file = fileAt(id: fileID), file.hasHeightOverride {
+            return toPixels(file.overrideHeight, originalPixels: origH)
+        }
+        if batch.hasHeightOverride { return toPixels(batch.overrideHeight, originalPixels: origH) }
+        return toPixels(globalHeight, originalPixels: origH)
     }
 
     func effectivePadding(for fileID: UUID, in batch: Batch) -> Int {
@@ -204,6 +254,23 @@ final class BatchProcessorViewModel: ObservableObject {
             allFiles.append(ImageFile(url: url))
             existing.insert(url)
         }
+    }
+
+    func addFilesAsBatch(urls: [URL]) {
+        let imageExts: Set<String> = ["png", "jpg", "jpeg", "tiff", "tif", "bmp", "gif", "heic", "webp"]
+        var existing = Set(allFiles.map(\.originalURL))
+        var newIDs: [UUID] = []
+        for url in urls {
+            guard imageExts.contains(url.pathExtension.lowercased()),
+                  !existing.contains(url) else { continue }
+            let file = ImageFile(url: url)
+            allFiles.append(file)
+            existing.insert(url)
+            newIDs.append(file.id)
+        }
+        guard !newIDs.isEmpty else { return }
+        batchCounter += 1
+        batches.append(Batch(label: "Batch \(batchCounter)", fileIDs: newIDs))
     }
 
     func importViaPanel() {

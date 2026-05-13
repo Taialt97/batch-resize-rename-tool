@@ -38,8 +38,6 @@ struct FileListView: View {
         DisclosureGroup(
             isExpanded: viewModel.isExpandedBinding(for: batch.id)
         ) {
-            batchSettingsRow(batch)
-
             ForEach(batch.fileIDs, id: \.self) { fileID in
                 BatchFileRowView(
                     fileID: fileID,
@@ -130,6 +128,21 @@ struct FileListView: View {
             }
 
             Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    if viewModel.editorTarget == .batch(batch.id) {
+                        viewModel.editorTarget = nil
+                    } else {
+                        viewModel.editorTarget = .batch(batch.id)
+                    }
+                }
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .foregroundStyle(viewModel.editorTarget == .batch(batch.id) ? Color.accentColor : .secondary)
+            }
+            .buttonStyle(.borderless)
+            .help("Edit batch overrides")
+
+            Button {
                 viewModel.removeBatch(id: batch.id)
             } label: {
                 Image(systemName: "trash")
@@ -137,85 +150,6 @@ struct FileListView: View {
             }
             .buttonStyle(.borderless)
             .help("Delete batch (files return to ungrouped)")
-        }
-    }
-
-    // MARK: - Batch Settings Row (Tier 2)
-
-    private func batchSettingsRow(_ batch: Batch) -> some View {
-        HStack(spacing: 10) {
-            Text("Batch Override:")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(width: 90, alignment: .trailing)
-
-            batchOverrideField(
-                "W", batchID: batch.id,
-                value: \.overrideWidth, flag: \.hasWidthOverride,
-                fallback: viewModel.globalWidth, width: 60
-            )
-            batchOverrideField(
-                "H", batchID: batch.id,
-                value: \.overrideHeight, flag: \.hasHeightOverride,
-                fallback: viewModel.globalHeight, width: 60
-            )
-            batchOverrideField(
-                "Pad", batchID: batch.id,
-                value: \.overridePadding, flag: \.hasPaddingOverride,
-                fallback: viewModel.globalPadding, width: 50
-            )
-            batchOverrideField(
-                "Pattern", batchID: batch.id,
-                value: \.overrideNamePattern, flag: \.hasNamePatternOverride,
-                fallback: viewModel.globalNamePattern, width: 140
-            )
-
-            Spacer()
-        }
-        .padding(.vertical, 4)
-    }
-
-    @ViewBuilder
-    private func batchOverrideField(
-        _ label: String,
-        batchID: UUID,
-        value valuePath: WritableKeyPath<Batch, String>,
-        flag flagPath: WritableKeyPath<Batch, Bool>,
-        fallback: String,
-        width: CGFloat
-    ) -> some View {
-        let batch = viewModel.batches.first { $0.id == batchID }
-        let isOverridden = batch?[keyPath: flagPath] ?? false
-        let currentText = isOverridden ? (batch?[keyPath: valuePath] ?? "") : fallback
-        let field = viewModel.overrideFieldFor(valuePath)
-
-        VStack(alignment: .leading, spacing: 1) {
-            HStack(spacing: 3) {
-                Text(label)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                if isOverridden {
-                    Button {
-                        if let f = field { viewModel.resetBatchOverride(batchID: batchID, field: f) }
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward.circle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Reset to global setting")
-                }
-            }
-            CommitTextField(text: currentText, onCommit: { newValue in
-                guard let idx = viewModel.batches.firstIndex(where: { $0.id == batchID })
-                else { return }
-                viewModel.batches[idx][keyPath: flagPath] = true
-                viewModel.batches[idx][keyPath: valuePath] = newValue
-            })
-            .textFieldStyle(.roundedBorder)
-            .frame(width: width)
-            .font(.system(.caption, design: .monospaced))
-            .foregroundStyle(isOverridden ? .primary : .secondary)
         }
     }
 

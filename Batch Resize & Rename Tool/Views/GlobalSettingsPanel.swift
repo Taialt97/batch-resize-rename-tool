@@ -14,7 +14,7 @@ struct GlobalSettingsPanel: View {
                 namingFields
             }
 
-            Text("Bracket syntax: [00] → 01, 02 …  [0000] → 0001, 0002 …  Zero count sets digit width.")
+            Text("Bracket syntax: [00] → \(viewModel.sequenceStartsAtZero ? "00, 01" : "01, 02") …  [0000] → \(viewModel.sequenceStartsAtZero ? "0000, 0001" : "0001, 0002") …  Zero count sets digit width.")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
@@ -55,9 +55,13 @@ struct GlobalSettingsPanel: View {
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 180)
 
-                Toggle("Continuous #", isOn: $viewModel.continuousNumbering)
+                Toggle("Number across all batches", isOn: $viewModel.continuousNumbering)
                     .toggleStyle(.checkbox)
-                    .help("ON = numbers run across all batches. OFF = each batch starts at 1.")
+                    .help("ON = one running sequence across all batches. OFF = each batch starts at 1.")
+
+                Toggle("Start at 0", isOn: $viewModel.sequenceStartsAtZero)
+                    .toggleStyle(.checkbox)
+                    .help("First file uses 0 instead of 1 in [00] patterns.")
             }
         }
     }

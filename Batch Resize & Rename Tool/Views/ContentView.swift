@@ -22,6 +22,11 @@ struct ContentView: View {
                 FileListView(viewModel: viewModel)
             }
 
+            if viewModel.editorTarget != nil {
+                Divider()
+                OverrideEditorPanel(viewModel: viewModel)
+            }
+
             Divider()
 
             bottomBar
@@ -182,7 +187,7 @@ private struct NoCropConfirmationSheet: View {
             Text("No Global Cropping Values")
                 .font(.headline)
 
-            Text("Some files have no cropping dimensions set at any level.\nThey will be renamed and copied without resizing.")
+            Text("Some files have no cropping dimensions set at any level.\nThey will be renamed and copied without resizing.\n\nYou'll choose a destination folder, and a \"Converted Images\" folder will be created with the processed files inside.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
 
@@ -205,5 +210,135 @@ private struct NoCropConfirmationSheet: View {
         }
         .padding(32)
         .frame(width: 400)
+    }
+}
+
+// MARK: - Override Editor Panel
+
+private struct OverrideEditorPanel: View {
+    @ObservedObject var viewModel: BatchProcessorViewModel
+
+    var body: some View {
+        HStack(spacing: 10) {
+            panelContent
+            Spacer()
+            Button { viewModel.editorTarget = nil } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Close editor")
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .id(viewModel.editorTarget)
+    }
+
+    @ViewBuilder
+    private var panelContent: some View {
+        if case .batch(let batchID) = viewModel.editorTarget,
+           let batch = viewModel.batches.first(where: { $0.id == batchID }) {
+            Label(batch.label, systemImage: "rectangle.stack.fill")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 80, alignment: .leading)
+
+            overrideField("W",
+                text: batch.hasWidthOverride ? batch.overrideWidth : viewModel.globalWidth,
+                overridden: batch.hasWidthOverride, width: 60,
+                onCommit: { v in setBatch(batchID, flag: \.hasWidthOverride, value: \.overrideWidth, v) },
+                onReset: { viewModel.resetBatchOverride(batchID: batchID, field: .width) })
+            overrideField("H",
+                text: batch.hasHeightOverride ? batch.overrideHeight : viewModel.globalHeight,
+                overridden: batch.hasHeightOverride, width: 60,
+                onCommit: { v in setBatch(batchID, flag: \.hasHeightOverride, value: \.overrideHeight, v) },
+                onReset: { viewModel.resetBatchOverride(batchID: batchID, field: .height) })
+            overrideField("Pad",
+                text: batch.hasPaddingOverride ? batch.overridePadding : viewModel.globalPadding,
+                overridden: batch.hasPaddingOverride, width: 50,
+                onCommit: { v in setBatch(batchID, flag: \.hasPaddingOverride, value: \.overridePadding, v) },
+                onReset: { viewModel.resetBatchOverride(batchID: batchID, field: .padding) })
+            overrideField("Pattern",
+                text: batch.hasNamePatternOverride ? batch.overrideNamePattern : viewModel.globalNamePattern,
+                overridden: batch.hasNamePatternOverride, width: 150,
+                onCommit: { v in setBatch(batchID, flag: \.hasNamePatternOverride, value: \.overrideNamePattern, v) },
+                onReset: { viewModel.resetBatchOverride(batchID: batchID, field: .namePattern) })
+
+        } else if case .file(let fileID, batchID: let batchID) = viewModel.editorTarget,
+                  let file = viewModel.fileAt(id: fileID),
+                  let batch = viewModel.batches.first(where: { $0.id == batchID }) {
+            Label(file.originalName, systemImage: "photo")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: 80, alignment: .leading)
+                .lineLimit(1)
+
+            overrideField("W",
+                text: file.hasWidthOverride ? file.overrideWidth
+                    : inherited(batch.overrideWidth, flag: batch.hasWidthOverride, global: viewModel.globalWidth),
+                overridden: file.hasWidthOverride, width: 60,
+                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasWidthOverride = true; $0.overrideWidth = v } },
+                onReset: { viewModel.resetFileOverride(id: fileID, field: .width) })
+            overrideField("H",
+                text: file.hasHeightOverride ? file.overrideHeight
+                    : inherited(batch.overrideHeight, flag: batch.hasHeightOverride, global: viewModel.globalHeight),
+                overridden: file.hasHeightOverride, width: 60,
+                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasHeightOverride = true; $0.overrideHeight = v } },
+                onReset: { viewModel.resetFileOverride(id: fileID, field: .height) })
+            overrideField("Pad",
+                text: file.hasPaddingOverride ? file.overridePadding
+                    : inherited(batch.overridePadding, flag: batch.hasPaddingOverride, global: viewModel.globalPadding),
+                overridden: file.hasPaddingOverride, width: 50,
+                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasPaddingOverride = true; $0.overridePadding = v } },
+                onReset: { viewModel.resetFileOverride(id: fileID, field: .padding) })
+            overrideField("Pattern",
+                text: file.hasNamePatternOverride ? file.overrideNamePattern
+                    : inherited(batch.overrideNamePattern, flag: batch.hasNamePatternOverride, global: viewModel.globalNamePattern),
+                overridden: file.hasNamePatternOverride, width: 150,
+                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasNamePatternOverride = true; $0.overrideNamePattern = v } },
+                onReset: { viewModel.resetFileOverride(id: fileID, field: .namePattern) })
+        }
+    }
+
+    private func setBatch(_ batchID: UUID, flag: WritableKeyPath<Batch, Bool>, value: WritableKeyPath<Batch, String>, _ v: String) {
+        guard let idx = viewModel.batches.firstIndex(where: { $0.id == batchID }) else { return }
+        viewModel.batches[idx][keyPath: flag] = true
+        viewModel.batches[idx][keyPath: value] = v
+    }
+
+    private func inherited(_ batchValue: String, flag: Bool, global: String) -> String {
+        (flag && !batchValue.isEmpty) ? batchValue : global
+    }
+
+    @ViewBuilder
+    private func overrideField(
+        _ label: String,
+        text: String,
+        overridden: Bool,
+        width: CGFloat,
+        onCommit: @escaping (String) -> Void,
+        onReset: @escaping () -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(spacing: 3) {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                if overridden {
+                    Button(action: onReset) {
+                        Image(systemName: "arrow.uturn.backward.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Reset to inherited setting")
+                }
+            }
+            CommitTextField(text: text, onCommit: onCommit)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: width)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(overridden ? .primary : .secondary)
+        }
     }
 }

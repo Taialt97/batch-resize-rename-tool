@@ -45,7 +45,9 @@ struct BatchFileRowView: View {
     let batch: Batch
     @ObservedObject var viewModel: BatchProcessorViewModel
 
-    @State private var showOverrides = false
+    private var isEditing: Bool {
+        viewModel.editorTarget == .file(fileID, batchID: batch.id)
+    }
 
     private var file: ImageFile? {
         viewModel.fileAt(id: fileID)
@@ -57,12 +59,7 @@ struct BatchFileRowView: View {
 
     var body: some View {
         if let file {
-            VStack(alignment: .leading, spacing: 4) {
-                mainRow(file)
-                if showOverrides {
-                    overrideFields(file)
-                }
-            }
+            mainRow(file)
         }
     }
 
@@ -104,10 +101,16 @@ struct BatchFileRowView: View {
             Spacer()
 
             Button {
-                withAnimation(.easeInOut(duration: 0.2)) { showOverrides.toggle() }
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    if isEditing {
+                        viewModel.editorTarget = nil
+                    } else {
+                        viewModel.editorTarget = .file(fileID, batchID: batch.id)
+                    }
+                }
             } label: {
-                Image(systemName: showOverrides ? "chevron.up" : "slider.horizontal.3")
-                    .foregroundStyle(.secondary)
+                Image(systemName: "slider.horizontal.3")
+                    .foregroundStyle(isEditing ? Color.accentColor : .secondary)
             }
             .buttonStyle(.borderless)
             .help("Edit per‑file overrides")
@@ -120,78 +123,6 @@ struct BatchFileRowView: View {
             }
             .buttonStyle(.borderless)
             .help("Remove from batch")
-        }
-    }
-
-    // MARK: - Override Panel
-
-    private func overrideFields(_ file: ImageFile) -> some View {
-        let b = currentBatch ?? batch
-
-        return HStack(spacing: 10) {
-            overrideField("W",
-                text: file.hasWidthOverride ? file.overrideWidth
-                    : inherited(batchValue: b.overrideWidth, batchFlag: b.hasWidthOverride, global: viewModel.globalWidth),
-                overridden: file.hasWidthOverride, width: 60,
-                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasWidthOverride = true; $0.overrideWidth = v } },
-                onReset: { viewModel.resetFileOverride(id: fileID, field: .width) }
-            )
-            overrideField("H",
-                text: file.hasHeightOverride ? file.overrideHeight
-                    : inherited(batchValue: b.overrideHeight, batchFlag: b.hasHeightOverride, global: viewModel.globalHeight),
-                overridden: file.hasHeightOverride, width: 60,
-                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasHeightOverride = true; $0.overrideHeight = v } },
-                onReset: { viewModel.resetFileOverride(id: fileID, field: .height) }
-            )
-            overrideField("Pad",
-                text: file.hasPaddingOverride ? file.overridePadding
-                    : inherited(batchValue: b.overridePadding, batchFlag: b.hasPaddingOverride, global: viewModel.globalPadding),
-                overridden: file.hasPaddingOverride, width: 50,
-                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasPaddingOverride = true; $0.overridePadding = v } },
-                onReset: { viewModel.resetFileOverride(id: fileID, field: .padding) }
-            )
-            overrideField("Pattern",
-                text: file.hasNamePatternOverride ? file.overrideNamePattern
-                    : inherited(batchValue: b.overrideNamePattern, batchFlag: b.hasNamePatternOverride, global: viewModel.globalNamePattern),
-                overridden: file.hasNamePatternOverride, width: 150,
-                onCommit: { v in viewModel.updateFile(id: fileID) { $0.hasNamePatternOverride = true; $0.overrideNamePattern = v } },
-                onReset: { viewModel.resetFileOverride(id: fileID, field: .namePattern) }
-            )
-            Spacer()
-        }
-        .padding(.leading, 44)
-        .padding(.top, 2)
-    }
-
-    @ViewBuilder
-    private func overrideField(
-        _ label: String,
-        text: String,
-        overridden: Bool,
-        width: CGFloat,
-        onCommit: @escaping (String) -> Void,
-        onReset: @escaping () -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            HStack(spacing: 3) {
-                Text(label)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                if overridden {
-                    Button(action: onReset) {
-                        Image(systemName: "arrow.uturn.backward.circle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Reset to batch / global setting")
-                }
-            }
-            CommitTextField(text: text, onCommit: onCommit)
-                .textFieldStyle(.roundedBorder)
-                .frame(width: width)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(overridden ? .primary : .secondary)
         }
     }
 
@@ -276,15 +207,4 @@ struct BatchFileRowView: View {
         .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 
-    // MARK: - Value Resolution
-
-    private func inherited(
-        batchValue: String, batchFlag: Bool, global: String
-    ) -> String {
-        (batchFlag && !batchValue.isEmpty) ? batchValue : global
-    }
-
-    private var currentBatch: Batch? {
-        viewModel.batches.first { $0.id == batch.id }
-    }
 }

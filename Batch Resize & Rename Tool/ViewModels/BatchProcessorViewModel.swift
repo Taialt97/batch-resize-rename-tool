@@ -11,6 +11,7 @@ final class BatchProcessorViewModel: ObservableObject {
     @Published var globalPadding = "0"
     @Published var globalNamePattern = ""
     @Published var continuousNumbering = false
+    @Published var sequenceStartsAtZero = false
 
     // MARK: - Data
 
@@ -35,6 +36,12 @@ final class BatchProcessorViewModel: ObservableObject {
     @Published var alertMessage = ""
     @Published var showAlert = false
     @Published var showNoCropConfirmation = false
+
+    enum EditorTarget: Hashable {
+        case batch(UUID)
+        case file(UUID, batchID: UUID)
+    }
+    @Published var editorTarget: EditorTarget?
 
     var suppressNoCropWarning: Bool {
         get { UserDefaults.standard.bool(forKey: "suppressNoCropWarning") }
@@ -99,18 +106,19 @@ final class BatchProcessorViewModel: ObservableObject {
     }
 
     func sequenceNumber(for fileID: UUID, in batch: Batch) -> Int {
+        let offset = sequenceStartsAtZero ? 0 : 1
         if continuousNumbering {
-            var count = 0
+            var count = -1
             for b in batches {
                 for fid in b.fileIDs {
                     count += 1
-                    if fid == fileID { return count }
+                    if fid == fileID { return count + offset }
                 }
             }
             return 0
         } else {
             guard let index = batch.fileIDs.firstIndex(of: fileID) else { return 0 }
-            return index + 1
+            return index + offset
         }
     }
 
@@ -209,12 +217,14 @@ final class BatchProcessorViewModel: ObservableObject {
     }
 
     func removeFile(id: UUID) {
+        if case .file(let fid, _) = editorTarget, fid == id { editorTarget = nil }
         for i in batches.indices { batches[i].fileIDs.removeAll { $0 == id } }
         allFiles.removeAll { $0.id == id }
         selectedFileIDs.remove(id)
     }
 
     func removeAllFiles() {
+        editorTarget = nil
         allFiles.removeAll()
         batches.removeAll()
         selectedFileIDs.removeAll()
@@ -256,10 +266,19 @@ final class BatchProcessorViewModel: ObservableObject {
     }
 
     func removeBatch(id: UUID) {
+        switch editorTarget {
+        case .batch(let bid) where bid == id:
+            editorTarget = nil
+        case .file(_, batchID: let bid) where bid == id:
+            editorTarget = nil
+        default:
+            break
+        }
         batches.removeAll { $0.id == id }
     }
 
     func removeFileFromBatch(fileID: UUID, batchID: UUID) {
+        if editorTarget == .file(fileID, batchID: batchID) { editorTarget = nil }
         guard let idx = batches.firstIndex(where: { $0.id == batchID }) else { return }
         batches[idx].fileIDs.removeAll { $0 == fileID }
     }
@@ -435,7 +454,7 @@ final class BatchProcessorViewModel: ObservableObject {
         panel.allowsMultipleSelection = false
         panel.canCreateDirectories = true
         panel.prompt = "Choose Destination"
-        panel.message = "Select where \"Converted Images\" will be created"
+        panel.message = "A new \"Converted Images\" folder will be created at the selected location containing your processed images."
 
         guard panel.runModal() == .OK, let baseURL = panel.url else { return }
 
